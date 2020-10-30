@@ -16,25 +16,26 @@ RUN apt-get install -y build-essential git ninja-build ccache
 
 RUN apt install -y python3.7
 RUN mkdir -p /usr/phamduy
-WORKDIR /usr/phamduy
+WORKDIR /usr/
 RUN apt-get install wget
 RUN apt-get install zip unzip
 RUN wget https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
 RUN apt-get install git-lfs
-RUN wget https://apache.org/dist/incubator/mxnet/1.5.0/apache-mxnet-src-1.5.0-incubating.tar.gz -P /usr/
+RUN wget https://apache.org/dist/incubator/mxnet/1.5.0/apache-mxnet-src-1.5.0-incubating.tar.gz -P /usr
+RUN tar -xvzf /usr/apache-mxnet-src-1.5.0-incubating.tar.gz
 RUN mv /usr/apache-mxnet-src-1.5.0-incubating /usr/mxnet
-COPY seg_ops_cuda/mxnet_op/seg_op.* /usr/mxnet/src/operator/contrib
+COPY seg_ops_cuda/mxnet_op/seg_op.* /usr/mxnet/src/operator/contrib/
 
 RUN version=3.14
 RUN build=0
-WORKDIR /usr/mxnet/docs/install
-RUN ./install_mxnet_ubuntu_python.sh
-RUN !/usr/bin/env bash
-RUN set -exuo pipefail
+COPY install_mxnet_ubuntu_python.sh /usr/mxnet/
+#RUN /usr/mxnet/install_mxnet_ubuntu_python.sh
+
+#RUN set -exuo pipefail
 RUN apt remove --purge --auto-remove cmake
 RUN mkdir -p /usr/tmp
 WORKDIR /usr/tmp
-RUN wget https://cmake.org/files/v$version/cmake-$version.$build.tar.gz
+RUN wget https://cmake.org/files/v3.14/cmake-$version.0.tar.gz
 RUN tar -xzvf cmake-$version.$build.tar.gz
 RUN cd cmake-$version.$build/
 RUN ./bootstrap
