@@ -1,0 +1,11 @@
+version: '2.4'
+services:
+    pham:
+        build: .
+        volumes:
+            - /home/itolab/phamduy/GaAN:/usr/phamduy/
+        ## runtimeを指定する！！
+        runtime: nvidia
+        environment:
+            - NVIDIA_VISIBLE_DEVICES=all
+        command: nvidia-smi
