@@ -1,6 +1,6 @@
 version: '2.4'
 services:
-    pham:
+    gaan:
         build: .
         volumes:
             - /home/itolab/phamduy/GaAN:/usr/phamduy/

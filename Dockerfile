@@ -35,29 +35,34 @@ COPY install_mxnet_ubuntu_python.sh /usr/mxnet/
 RUN apt remove --purge --auto-remove cmake
 RUN mkdir -p /usr/tmp
 WORKDIR /usr/tmp
-RUN wget https://cmake.org/files/v3.14/cmake-$version.0.tar.gz
-RUN tar -xzvf cmake-$version.$build.tar.gz
-RUN cd cmake-$version.$build/
-RUN ./bootstrap
+RUN wget https://cmake.org/files/v3.14/cmake-3.14.0.tar.gz
+RUN tar -xzvf cmake-3.14.0.tar.gz
+RUN cd cmake-3.14.0/
+RUN cmake-3.14.0/bootstrap
 RUN make -j$(nproc)
 RUN make install
 
-RUN apt-get install -y libopenblas-dev
-RUN apt-get install -y libopencv-dev
-
+RUN apt-get install -y --no-install-recommends libopenblas-dev
+RUN DEBIAN_FRONTEND="noninteractive" apt-get install --yes --no-install-recommends libopencv-dev
+RUN apt-get install -y build-essential libatlas-base-dev
+ADD config.mk /usr/mxnet/config.mk
 WORKDIR /usr/mxnet
-RUN rm -rf build
-RUN mkdir -p build && cd build
-RUN cmake -GNinja \
-        -DUSE_CUDA=ON \
-        -DUSE_MKL_IF_AVAILABLE=OFF \
-        -DCMAKE_CUDA_COMPILER_LAUNCHER=ccache \
-        -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-        -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-    ..
-RUN ninja
-RUN cd python
+RUN make -j$(nproc)
+
+# Add Python support
+
+WORKDIR /usr/mxnet/python
+
 RUN pip3 install -e .
 
+ADD GraphSampler /usr/GraphSampler
+RUN mkdir /usr/GraphSampler/build
+
+WORKDIR /usr/GraphSampler/build
+RUN cmake ..
+RUN make
+RUN mkdir /usr/mxgraph
+WORKDIR /usr/GraphSampler
+RUN python3 install.py
 
 WORKDIR /usr/phamduy
